@@ -1,47 +1,48 @@
 import streamlit as st
+from streamlit_drawable_canvas import st_canvas
 from PIL import Image
 import numpy as np
-from streamlit_drawable_canvas import st_canvas
+import io
 
-st.set_page_config(page_title="Corretor de Gabarito", layout="wide")
-st.title("📌 Corretor de Gabarito")
+st.set_page_config(page_title="Gabarito Oficial", layout="wide")
 
-st.markdown("## 👆 Clique em 'Enviando Gabarito Oficial'")
+st.title("📄 Enviando Gabarito Oficial")
+st.write("Envie uma imagem ou tire uma foto do gabarito em branco e clique sobre os círculos corretos.")
 
-# Escolha entre tirar foto ou fazer upload
-opcao = st.radio("Como deseja enviar a imagem do gabarito?", ["📸 Tirar Foto (Câmera)", "📁 Fazer Upload"], horizontal=True)
+# --- Opção de envio da imagem ---
+upload_option = st.radio("Escolha como enviar a imagem:", ("📁 Fazer upload", "📷 Usar câmera"))
 
-# Lê a imagem dependendo da opção
-imagem = None
-if opcao == "📁 Fazer Upload":
-    uploaded_image = st.file_uploader("Faça o upload da imagem do gabarito oficial", type=["png", "jpg", "jpeg"])
-    if uploaded_image is not None:
-        imagem = Image.open(uploaded_image)
-        st.image(imagem, caption="Imagem enviada", use_column_width=True)
+image_data = None
 
-elif opcao == "📸 Tirar Foto (Câmera)":
-    camera_image = st.camera_input("Tire uma foto com o gabarito oficial")
-    if camera_image is not None:
-        imagem = Image.open(camera_image)
-        st.image(imagem, caption="Foto tirada", use_column_width=True)
+if upload_option == "📁 Fazer upload":
+    uploaded_file = st.file_uploader("Envie o gabarito em branco", type=["jpg", "jpeg", "png"])
+    if uploaded_file:
+        image_data = uploaded_file.read()
 
-# Se a imagem estiver carregada, permite clicar nos círculos
-if imagem is not None:
-    st.markdown("## 🖱️ Clique sobre os círculos corretos para marcar as respostas do gabarito")
+elif upload_option == "📷 Usar câmera":
+    if st.button("Ativar câmera"):
+        camera_photo = st.camera_input("Tire uma foto do gabarito")
+        if camera_photo:
+            image_data = camera_photo.getvalue()
+
+# --- Se imagem disponível, mostrar e permitir seleção interativa ---
+if image_data:
+    image = Image.open(io.BytesIO(image_data))
+
+    st.markdown("### 🖍️ Clique nos círculos corretos do gabarito")
+
     canvas_result = st_canvas(
-        fill_color="rgba(255, 165, 0, 0.3)",
-        stroke_width=3,
-        stroke_color="#FF0000",
-        background_image=imagem,
+        fill_color="rgba(0, 255, 0, 0.3)",
+        stroke_width=2,
+        stroke_color="green",
+        background_image=image,
         update_streamlit=True,
-        height=imagem.height,
-        width=imagem.width,
-        drawing_mode="circle",
+        height=image.height,
+        width=image.width,
+        drawing_mode="point",
         key="canvas",
     )
 
-    if st.button("Salvar Gabarito Base"):
-        if canvas_result.json_data is not None:
-            st.success("✔️ Gabarito base salvo com sucesso (simulação)!")
-        else:
-            st.warning("⚠️ Você ainda não marcou nenhuma resposta no gabarito.")
+    if canvas_result.json_data:
+        st.success("Você selecionou as posições corretas do gabarito.")
+        st.json(canvas_result.json_data)
