@@ -5,31 +5,31 @@ from utils.align_image import detect_and_align&#8203;:contentReference[oaicite:0
 
 :contentReference[oaicite:1]{index=1}&#8203;:contentReference[oaicite:2]{index=2}
 
-:contentReference[oaicite:3]{index=3}&#8203;:contentReference[oaicite:4]{index=4}
+st.title("📄 Enviando Gabarito Oficial")&#8203;:contentReference[oaicite:3]{index=3}
+
+st.markdown("### Etapa 1: Envie ou capture a imagem do gabarito")&#8203;:contentReference[oaicite:4]{index=4}
 
 :contentReference[oaicite:5]{index=5}&#8203;:contentReference[oaicite:6]{index=6}
 
-:contentReference[oaicite:7]{index=7}&#8203;:contentReference[oaicite:8]{index=8}
+# :contentReference[oaicite:7]{index=7}
+:contentReference[oaicite:8]{index=8}&#8203;:contentReference[oaicite:9]{index=9}
 
-# :contentReference[oaicite:9]{index=9}
-:contentReference[oaicite:10]{index=10}&#8203;:contentReference[oaicite:11]{index=11}
-
-:contentReference[oaicite:12]{index=12}
+:contentReference[oaicite:10]{index=10}
     uploaded_file = st.file_uploader("📁 Enviar imagem", type=["jpg", "jpeg", "png"])
 
-:contentReference[oaicite:13]{index=13}
+:contentReference[oaicite:11]{index=11}
     camera_image = st.camera_input("📷 Tirar foto")
 
-:contentReference[oaicite:14]{index=14}&#8203;:contentReference[oaicite:15]{index=15}
+:contentReference[oaicite:12]{index=12}&#8203;:contentReference[oaicite:13]{index=13}
 
-:contentReference[oaicite:16]{index=16}
+if uploaded_file is not None:
     image = Image.open(uploaded_file)
     image_np = np.array(image)
-:contentReference[oaicite:17]{index=17}
+elif camera_image is not None:
     image = Image.open(camera_image)
     image_np = np.array(image)
 
-:contentReference[oaicite:18]{index=18}
+if image_np is not None:
     st.markdown("### Etapa 2: Alinhando a imagem do gabarito...")
     try:
         aligned_image = detect_and_align(image_np)
