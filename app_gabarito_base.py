@@ -1,58 +1,41 @@
 import streamlit as st
-from streamlit_drawable_canvas import st_canvas
 from PIL import Image
-import json
-import os
+import numpy as np
+import cv2
+from utils.align_image import detect_and_align
 
-st.set_page_config(page_title="Enviar Gabarito Oficial", layout="wide")
-st.title("📌 Enviando Gabarito Oficial")
+st.set_page_config(page_title="Enviando Gabarito Oficial", layout="centered")
 
-# Armazena os pontos clicados
-if "pontos_gabarito" not in st.session_state:
-    st.session_state.pontos_gabarito = []
+st.title("📄 Enviando Gabarito Oficial")
 
-# Carregar imagem
-input_option = st.radio("Selecione o modo de envio da imagem:", ["Upload da imagem", "Tirar uma foto"])
-uploaded_file = None
+st.markdown("### Etapa 1: Envie ou capture a imagem do gabarito")
+st.markdown("Você pode **tirar uma foto** ou **enviar uma imagem existente** do gabarito.")
 
-if input_option == "Upload da imagem":
-    uploaded_file = st.file_uploader("Envie o gabarito oficial", type=["png", "jpg", "jpeg"])
-else:
-    uploaded_file = st.camera_input("Tire uma foto do gabarito oficial")
+# Opções de envio
+col1, col2 = st.columns(2)
 
-if uploaded_file:
+with col1:
+    uploaded_file = st.file_uploader("📁 Enviar imagem", type=["jpg", "jpeg", "png"])
+
+with col2:
+    camera_image = st.camera_input("📷 Tirar foto")
+
+image_np = None
+
+if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Imagem enviada", use_column_width=True)
+    image_np = np.array(image)
+elif camera_image is not None:
+    image = Image.open(camera_image)
+    image_np = np.array(image)
 
-    # Canvas para desenhar e registrar cliques
-    canvas_result = st_canvas(
-        fill_color="rgba(255, 0, 0, 0.5)",
-        stroke_width=2,
-        background_image=image,
-        update_streamlit=True,
-        height=image.height,
-        width=image.width,
-        drawing_mode="point",
-        point_display_radius=8,
-        key="canvas_gabarito"
-    )
+if image_np is not None:
+    st.markdown("### Etapa 2: Alinhando a imagem do gabarito...")
+    try:
+        aligned_image = detect_and_align(image_np)
+        st.image(aligned_image, caption="Imagem Alinhada", use_column_width=True)
+        st.success("✅ Imagem alinhada com sucesso!")
+        # Aqui você pode adicionar a próxima etapa, como a marcação do gabarito
+    except Exception as e:
+        st.error(f"❌ Erro ao alinhar a imagem: {e}")
 
-    # Botão para registrar clique
-    if canvas_result.json_data is not None:
-        objects = canvas_result.json_data.get("objects", [])
-        st.session_state.pontos_gabarito = [{"x": obj["left"], "y": obj["top"]} for obj in objects if obj["type"] == "circle"]
-
-    # Exibir pontos marcados
-    st.markdown("### Questões marcadas:")
-    for i, ponto in enumerate(st.session_state.pontos_gabarito):
-        st.write(f"Questão {i + 1}: (x={int(ponto['x'])}, y={int(ponto['y'])})")
-
-    # Botão para salvar gabarito
-    if st.button("💾 Salvar Gabarito Oficial"):
-        if len(st.session_state.pontos_gabarito) == 0:
-            st.warning("Nenhum ponto foi marcado.")
-        else:
-            gabarito = {"questoes": st.session_state.pontos_gabarito}
-            with open("gabarito_oficial.json", "w") as f:
-                json.dump(gabarito, f, indent=4)
-            st.success("✅ Gabarito oficial salvo com sucesso como 'gabarito_oficial.json'.")
