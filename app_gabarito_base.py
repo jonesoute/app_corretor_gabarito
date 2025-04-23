@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 import numpy as np
-from utils.align_image import detect_and_align&#8203;:contentReference[oaicite:0]{index=0}
+from utils.align_image import detect_and_align
 
 :contentReference[oaicite:1]{index=1}&#8203;:contentReference[oaicite:2]{index=2}
 
