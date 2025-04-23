@@ -2,4 +2,4 @@ streamlit
 numpy
 Pillow
 opencv-contrib-python-headless
-
+protobuf==3.20.*
