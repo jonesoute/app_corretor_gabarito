@@ -14,17 +14,22 @@ image_np = None
 # Opção de envio de imagem
 uploaded_file = st.file_uploader("📁 Enviar imagem", type=["jpg", "jpeg", "png"])
 
-# Checkbox para ativar a câmera
-ativar_camera = st.checkbox("📷 Ativar câmera")
+# Inicializa o estado da câmera
+if "camera_active" not in st.session_state:
+    st.session_state.camera_active = False
 
-if ativar_camera:
-    try:
-        camera_image = st.camera_input("Capturar imagem")
-        if camera_image is not None:
-            image = Image.open(camera_image)
-            image_np = np.array(image)
-    except Exception as e:
-        st.error(f"Erro ao acessar a câmera: {e}")
+# Botão para ativar a câmera
+if st.button("📷 Tirar foto"):
+    st.session_state.camera_active = True
+
+# Se a câmera estiver ativa, exibe o widget de captura
+if st.session_state.camera_active:
+    camera_image = st.camera_input("Capturar imagem")
+    if camera_image is not None:
+        image = Image.open(camera_image)
+        image_np = np.array(image)
+        # Após capturar a imagem, desativa a câmera
+        st.session_state.camera_active = False
 
 # Se uma imagem foi enviada via upload
 if uploaded_file is not None:
