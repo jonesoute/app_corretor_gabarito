@@ -14,13 +14,17 @@ image_np = None
 # Opção de envio de imagem
 uploaded_file = st.file_uploader("📁 Enviar imagem", type=["jpg", "jpeg", "png"])
 
-# Botão para ativar a câmera
-if st.button("📷 Tirar foto"):
-    camera_image = st.camera_input("Capturar imagem")
+# Checkbox para ativar a câmera
+ativar_camera = st.checkbox("📷 Ativar câmera")
 
-    if camera_image is not None:
-        image = Image.open(camera_image)
-        image_np = np.array(image)
+if ativar_camera:
+    try:
+        camera_image = st.camera_input("Capturar imagem")
+        if camera_image is not None:
+            image = Image.open(camera_image)
+            image_np = np.array(image)
+    except Exception as e:
+        st.error(f"Erro ao acessar a câmera: {e}")
 
 # Se uma imagem foi enviada via upload
 if uploaded_file is not None:
