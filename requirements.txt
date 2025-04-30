@@ -1,5 +1,6 @@
-streamlit
+
+streamlit==1.25.0
+streamlit_drawable_canvas==0.8.0
+opencv-contrib-python
 numpy
 Pillow
-opencv-contrib-python-headless
-protobuf==3.20.*
